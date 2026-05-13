@@ -1,0 +1,7 @@
+mosquitto/data/
+mosquitto/log/
+influxdb_data/
+grafana_data/
+__pycache__/
+*.pyc
+.env
