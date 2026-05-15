@@ -1,15 +1,6 @@
- Run
-```bash
-docker compose up -d
-python3 scripts/sensor_simulator.py
-# Access Grafana at http://localhost:3000 (admin/admin)
-
-
-
 # IESL Wellhead Monitoring Pipeline
 
-## Industry Context
-This project simulates an oil & gas remote monitoring system for wellhead assets (pressure, temperature, flow rate). 
+A real-time telemetry stack for monitoring wellhead assets pressure, temperature, and flow rate. Built to mirror the kind of monitoring International Energy Services Limited runs in the field.
 
 
 ## Architecture
@@ -20,65 +11,78 @@ This project simulates an oil & gas remote monitoring system for wellhead assets
 - **Grafana** | Dashboards with proper oilfield units (psi, °F, barrels/day) |
 - **Telegram Alerts** | Pings you when temp or pressure step out of line |
 
-## How to Run
 
+## How to Run
 ```bash
 # Fire up the stack
 docker compose up -d
-
-# Start pumping fake sensor data
+```
+```bash
+# Start the sensor simulator
 python3 scripts/sensor_simulator.py
-
-# Kick off Telegram alerting (optional — run in a separate terminal)
+```
+```bash
+# Kick off Telegram alerting (separate terminal)
 python3 alerts/temp_alert.py
+```
 
-# Grafana lives at http://localhost:3000 — login with admin / admin.
-
+> Grafana is at **http://localhost:3000** — login with default username and password (admin/admin)
+                                                                                                     
 ## Standard Operating Ranges
-These are the baselines for a typical onshore wellhead:
 
-- Temperature: 100–180°F
+Baselines for a typical onshore wellhead:
 
-- Pressure: 800–1,200 psi
+| Metric | Normal Range |
+|--------|-------------|
+| **Temperature** | 100–180°F |
+| **Pressure** | 800–1,200 psi |
+| **Flow Rate** | 200–600 barrels/day |
 
-- Flow Rate: 200–600 barrels/day
+> The simulator runs cooler (60–95°F) so alerts trigger more often during testing.
+                                                                                                    
 
-The simulator runs a bit cooler (60–95°F) so alerts are easier to trigger during testing.
+## Alerts
 
-# Alerts
-alerts/temp_alert.py polls InfluxDB every 10 seconds. If temperature and pressure both stay above threshold for 5 seconds straight, it fires a Telegram message.
+`alerts/temp_alert.py` polls InfluxDB every **10 seconds**. If temperature and pressure both stay above threshold for **5 seconds** straight, it fires a Telegram alert.
 
-Right now it's wired for testing — it'll alert on normal conditions so you don't have to sit around waiting. Flip the comparison operators when you're ready for production.
+Currently wired for testing — it alerts on **normal** conditions so you see results immediately. Flip the comparison operators for production use.
 
-# Alert flow:
+### Alert Pipeline
 
-Sensor Simulator → MQTT → Telegraf → InfluxDB → temp_alert.py → Telegram
+```
+**Sensor Simulator → MQTT → Telegraf → InfluxDB → temp_alert.py → Telegram**
+```
 
----
 
-## Final Thoughts 
+## Project Structure
 
-This was a quick-and-dirty telemetry pipeline — MQTT ingest, time-series storage, dashboards, and alerting, all containerized and ready to demo. The whole thing spins up with one `docker compose` command and starts pushing data within seconds.
+```
+iesl-monitoring/
+├── docker-compose.yml
+├── telegraf.conf
+├── README.md
+├── .gitignore
+├── mosquitto/
+│   └── config/
+│       └── mosquitto.conf
+├── scripts/
+│   └── sensor_simulator.py
+├── alerts/
+│   └── temp_alert.py
+└── screenshots/
+    ├── grafana-dashboard.png
+    └── telegram-alert.png
+```
 
+
+## Final Thoughts
+
+This was a quick-and-dirty telemetry pipeline....... MQTT ingest, time-series storage, dashboards, and alerting, all containerized and ready to demo. The whole thing spins up with one `docker compose` command and starts pushing data within seconds.
 It's not production (obviously), but it hits all the beats a real wellhead monitoring system would: sensor ingestion, a proper time-series backend, live dashboards in oilfield units, and alerting routed straight to a phone.
 
 Built, tested, documented. Moving on.
 
-
-
-Cheers :))
-
-
-
-
-
-
-
-
-
-
-
-
+Cheers :)
 
 
 
